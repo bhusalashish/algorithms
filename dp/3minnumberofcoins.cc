@@ -1,6 +1,7 @@
 #include<bits/stdc++.h>
 using namespace std;
 #define ll long long
+#define INF 1E9
 auto speedup = [](){
 	ios_base::sync_with_stdio(false);
 	cin.tie(nullptr);
@@ -10,50 +11,42 @@ auto speedup = [](){
 	return 0;
 }();
 
-ll coinChangeMin(int coins[], int n, int amount, std::vector<int> res){
-	if(amount == 0) return 0;
-	if(n==0) return INT_MAX;
-	if(amount < coins[n-1])
-		return coinChangeMin(coins, n-1, amount, res);
-	return min(1+coinChangeMin(coins, n, amount-coins[n-1], res.push_back(coins[n-1])),  coinChangeMin(coins, n-1, amount, res));
-}
-
-ll coinChangeMinMemoize(int coins[], int n, int amount, vector<vector<int> > &dp){
-	if(amount == 0) return 0;
-	if(n==0) return INT_MAX;
-	if(dp[n][amount] != -1)
-		return dp[n][amount];
-	else{
-		if(amount < coins[n-1])
-			dp[n][amount] = coinChangeMinMemoize(coins, n-1, amount, dp);
-		else{
-			dp[n][amount] = min(1 + coinChangeMinMemoize(coins, n, amount-coins[n-1], dp), coinChangeMinMemoize(coins, n-1, amount, dp));
+void coinChangeMinimum(int coins[], int n, int amount){
+	int dp[n+1][amount+1];
+	for(int i=0; i<=n; ++i)
+		dp[i][0] = 0;
+	for(int i=1; i<=amount; ++i)
+		dp[0][i] = INF;
+	for(int i=1; i<=n; ++i){
+		for(int j=1; j<=amount; ++j){
+			if(coins[i-1] > j){
+				dp[i][j] = dp[i-1][j];
+			}
+			else{
+				dp[i][j] = min(1+dp[i][j- coins[i-1]], dp[i-1][j]);
+			}
 		}
 	}
-	return dp[n][amount];
+	int val = dp[n][amount], i=n, j=amount;
+	while(i>0){
+		if(dp[i][j] != dp[i-1][j]){
+			cout<<coins[i-1]<<" ";
+			j = j-coins[i-1];
+		}
+		else
+			i--;
+	}
+	cout<<endl;
 }
 
 int main(){
 	int t;
 	cin>>t;
 	while(t--){
-		int n=10, v;
-		cin>>v;
+		int amount, n=10;
+		cin>>amount;
 		int coins[] = { 1, 2, 5, 10, 20, 50, 100, 200, 500, 2000};
-// 		for(int i=0;i<n;++i) cin>>coins[i];
-// 		vector<vector<int> > dp(n+1, vector<int>(v+1, -1));
-		std::vector<int> result;
-		int res = coinChangeMin(coins, n, v, result);
-		if(res == INT_MAX) cout<<-1<<endl;
-		else cout<<res<<endl;
+		coinChangeMinimum(coins, n, amount);
 	}
 	return 0;
 }
-
-
-// Sample Test Cases
-// 1
-// 43
-
-// Expexted Output
-// 20 20 2 1
